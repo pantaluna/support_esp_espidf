@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := support_esp_mqtt
+PROJECT_NAME := support_esp_espidf
 
 include $(IDF_PATH)/make/project.mk
 
