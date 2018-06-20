@@ -42,9 +42,11 @@ void app_main() {
 
     ledc_fade_func_install(0);
 
-    for (j=0; j < 10; ++j) {
+    // Problem: no fading
+    for (j=0; j < 2; ++j) {
         duty = 0;
         ESP_LOGI(TAG,"=== freq=%i | vary duty 0..255 using ledc_set_fade_with_time(5 seconds)", freq);
+        ESP_LOGI(TAG,"  Set duty := 0");
         ESP_LOGI(TAG,"  ***PROBLEM ledc_set_fade_with_time() does not fade. It starts at duty 255 instead of duty 0 and so ends right away");
         ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, duty);
         ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
@@ -54,9 +56,11 @@ void app_main() {
         ledc_fade_start(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_WAIT_DONE);
     }
 
-    for (j=0; j < 10; ++j) {
+    // Fix: add delay 1 second after updating duty
+    for (j=0; j < 2; ++j) {
         duty = 0;
         ESP_LOGI(TAG,"=== freq=%i | vary duty 0..255 using ledc_set_fade_with_time(5 seconds)", freq);
+        ESP_LOGI(TAG,"  Set duty := 0");
         ESP_LOGI(TAG,"  ***OK when using a delay of 1 second after updating duty...***");
         ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, duty);
         ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
