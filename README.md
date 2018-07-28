@@ -102,7 +102,7 @@ git push origin --tags
 ```
 cd  /c/myiot/esp/support_esp_espidf
 git add .
-git commit -m "Updated xyz"
+git commit -m "Updated after testing  ESP-IDF v3.2-dev-343-g561884b6"
 
 git push --set-upstream origin master
 

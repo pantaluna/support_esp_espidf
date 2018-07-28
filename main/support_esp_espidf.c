@@ -8,9 +8,10 @@
 static const char TAG[] = "myapp";
 
 /*
- * GPIO selector (Adafruit HUZZAH32)
+ * Settings
+ *  GPIO selector (Adafruit HUZZAH32)
  */
-#define GPIO_NUM_OUTPUT_SOLO   (GPIO_NUM_14)
+#define GPIO_NUM_OUTPUT_LED    (GPIO_NUM_13)
 
 /*
  * MAIN
@@ -37,34 +38,38 @@ void app_main() {
     ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
     ledc_channel_config_t ledc_channel =
         { .timer_sel = LEDC_TIMER_0, .speed_mode = LEDC_HIGH_SPEED_MODE, .channel = LEDC_CHANNEL_0, .gpio_num =
-        GPIO_NUM_OUTPUT_SOLO, .duty = duty };
+        GPIO_NUM_OUTPUT_LED, .duty = duty };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 
     ESP_ERROR_CHECK(ledc_fade_func_install(0));
 
     // Problem: no fading
-    for (j=0; j < 2; ++j) {
+    for (j = 0; j < 5; ++j) {
+        ESP_LOGI(TAG, "Bug LOOP#%i of 5", j);
+
         duty = 0;
-        ESP_LOGI(TAG,"=== freq=%i | vary duty 0..255 using ledc_set_fade_with_time(5 seconds)", freq);
-        ESP_LOGI(TAG,"  Set duty := 0");
-        ESP_LOGE(TAG,"  ***PROBLEM ledc_set_fade_with_time() does not fade. It starts at duty 255 instead of duty 0 and so ends right away");
+        ESP_LOGI(TAG, "  freq=%i | vary duty 0..255 using ledc_set_fade_with_time(5 seconds)", freq);
+        ESP_LOGI(TAG, "  set duty := 0");
+        ESP_LOGE(TAG,
+                "  ***PROBLEM ledc_set_fade_with_time() does not fade. It starts at duty 255 instead of duty 0 and so ends right away");
         ESP_ERROR_CHECK(ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, duty));
         ESP_ERROR_CHECK(ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0));
-        //ESP_LOGI(TAG, "   FIX: wait 1 second after updating duty...");
-        //vTaskDelay(RTOS_DELAY_1SEC);
+
         ESP_ERROR_CHECK(ledc_set_fade_with_time(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 255, 5 * 1000));
         ESP_ERROR_CHECK(ledc_fade_start(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_WAIT_DONE));
     }
 
-    // Fix: add delay 1 second after updating duty
-    for (j=0; j < 2; ++j) {
+    // Workaround: add delay of 1 second after updating duty
+    for (j = 0; j < 5; ++j) {
+        ESP_LOGI(TAG, "Workaround LOOP#%i of 5", j);
+
         duty = 0;
-        ESP_LOGI(TAG,"=== freq=%i | vary duty 0..255 using ledc_set_fade_with_time(5 seconds)", freq);
-        ESP_LOGI(TAG,"  Set duty := 0");
-        ESP_LOGI(TAG,"  ***OK when using a delay of 1 second after updating duty...***");
+        ESP_LOGI(TAG, "  freq=%i | vary duty 0..255 using ledc_set_fade_with_time(5 seconds)", freq);
+        ESP_LOGI(TAG, "  set duty := 0");
+        ESP_LOGI(TAG, "  ***OK when adding a delay of 1 second after updating duty...***");
         ESP_ERROR_CHECK(ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, duty));
         ESP_ERROR_CHECK(ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0));
-        ESP_LOGI(TAG, "   FIX: wait 1 second after updating duty...");
+        ESP_LOGI(TAG, "   WORKAROUND: wait 1 second after updating duty...");
         vTaskDelay(RTOS_DELAY_1SEC);
         ESP_ERROR_CHECK(ledc_set_fade_with_time(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 255, 5 * 1000));
         ESP_ERROR_CHECK(ledc_fade_start(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_WAIT_DONE));
